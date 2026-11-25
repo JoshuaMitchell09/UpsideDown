@@ -768,7 +768,7 @@ body.is-locked{overflow:hidden}
 
 <!-- ============ PRELOADER: "UD" se dibuja, rota 180° y el telón sube ============ -->
 <div class="preloader" id="preloader" aria-hidden="true">
-  <img src="assets/img/logo-ud.webp" alt="" width="342" height="400" fetchpriority="high">
+  <img src="/assets/img/logo-ud.webp" alt="" width="342" height="400" fetchpriority="high">
   <div class="preloader-bar"></div>
 </div>
 
@@ -784,7 +784,7 @@ body.is-locked{overflow:hidden}
   <nav class="nav" aria-label="Principal">
     <div class="container">
       <a href="#inicio" class="logo magnetic" aria-label="UPSIDEDOWN, ir al inicio">
-        <img class="logo-mark" src="assets/img/logo-ud.webp" alt="" width="342" height="400">
+        <img class="logo-mark" src="/assets/img/logo-ud.webp" alt="" width="342" height="400">
       </a>
       <ul class="nav-links">
         <li><a href="#inicio">Inicio</a></li>
@@ -857,7 +857,7 @@ body.is-locked{overflow:hidden}
       <ul class="qv-perks">
         <li>⚡ Envío 24–72 h a todo Costa Rica</li><li>🛡️ Garantía 30 días</li><li>📲 SINPE Móvil o tarjeta</li><li>🏀 Probados en la LSB</li>
       </ul>
-      <a class="qv-full" id="qvFull" href="#">Ver página completa del producto →</a>
+      <button type="button" class="qv-full" id="qvFull">🔗 Copiar link de este modelo</button>
     </div>
   </div>
 </div>
@@ -874,7 +874,7 @@ body.is-locked{overflow:hidden}
     <div class="cart-body" data-lenis-prevent>
       <ul class="cart-items" id="cartItems"></ul>
       <div class="cart-empty" id="cartEmpty">
-        <img src="assets/img/logo-ud.webp" alt="" width="342" height="400" loading="lazy">
+        <img src="/assets/img/logo-ud.webp" alt="" width="342" height="400" loading="lazy">
         <h3 class="display">Tu carrito está vacío</h3>
         <p>Elegí tus tenis y empezá a dominar la cancha.</p>
         <a href="#modelos" class="btn btn-primary" data-close><span class="btn-label">Ver tenis</span></a>
@@ -931,7 +931,7 @@ body.is-locked{overflow:hidden}
       </h1>
       <p class="lead hero-sub hero-fade">Agarre que frena en seco. Amortiguación. Durabilidad para toda la temporada. <strong style="color:var(--bone)">Con UD cambia el juego.</strong></p>
       <div class="hero-ctas hero-fade">
-        <a href="/products/ud-wt002" class="btn btn-primary btn-lg magnetic"><span class="btn-label">Comprar ahora
+        <a href="/products/ud-wt002" class="btn btn-primary btn-lg magnetic" data-quick="wt002" aria-haspopup="dialog"><span class="btn-label">Comprar ahora
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
         <a href="#modelos" class="btn btn-ghost btn-lg magnetic"><span class="btn-label">Ver modelos</span></a>
       </div>
@@ -1184,7 +1184,7 @@ body.is-locked{overflow:hidden}
   <div class="container">
     <div class="footer-grid">
       <div class="footer-brand">
-        <img class="logo-mark" src="assets/img/logo-ud.webp" alt="UPSIDEDOWN" width="342" height="400" loading="lazy" style="height:120px;margin-bottom:18px">
+        <img class="logo-mark" src="/assets/img/logo-ud.webp" alt="UPSIDEDOWN" width="342" height="400" loading="lazy" style="height:120px;margin-bottom:18px">
         <div class="big">UPSIDE<br><span class="grad-text">DOWN</span></div>
         <p>Tenis de baloncesto y accesorios de alto rendimiento. Probados en la LSB. Hechos para cambiar el juego.</p>
         <div class="socials">
@@ -1251,7 +1251,11 @@ body.is-locked{overflow:hidden}
    con FONDO TRANSPARENTE (idealmente 1600px de ancho, vista lateral,
    punta hacia la derecha) para que luzcan el float, tilt y reflejo.
    ========================================================= */
-const IMG = 'assets/img/';   // en Shopify: {{ 'archivo.webp' | asset_url }}
+// Rutas desde la raíz del sitio: así las fotos cargan en cualquier URL (/, /products/..., etc.).
+// Si se abre el archivo con doble clic (file://) se usan rutas relativas.
+const ROOT = location.protocol === 'file:' ? '' : '/';
+const IMG = ROOT + 'assets/img/';   // en Shopify: {{ 'archivo.webp' | asset_url }}
+if (!ROOT) document.querySelectorAll('img[src^="/assets/"]').forEach(i => i.src = i.getAttribute('src').slice(1));
 const UD_ASSETS = {
   heroShoe:   { src:IMG+'wt002.webp', alt:'Tenis UD WT002 azul marino con degradado amarillo a naranja', label:'FOTO: WT002 vista lateral, PNG fondo transparente' },
   heroBg:     { src:'', label:'FOTO: cancha oscura con reflector (fondo hero)' },
@@ -1898,7 +1902,7 @@ const QV = (() => {
     $('#qvName').textContent = p.name;
     $('#qvPrice').innerHTML = `${p.from ? '<span class="from">Desde</span>' : ''}<span class="now">${fmt(p.now)}</span><s><span class="sr-only">Antes </span>${fmt(p.was)}</s>`;
     $('#qvDesc').textContent = p.desc || 'Pensado para rendir partido tras partido. Escribinos por WhatsApp si tenés dudas.';
-    $('#qvFull').href = `/products/${p.handle}`;
+    $('#qvFull').textContent = '🔗 Copiar link de este modelo';
     $('#qvQty output').textContent = 1;
     $('#qvSizeMsg').textContent = '';
     // Colores
@@ -1911,7 +1915,20 @@ const QV = (() => {
     $('#qvSizeNote').textContent = isShoe(p) && !sz.length ? 'Tallas disponibles a consulta: escribinos y te confirmamos al toque.' : '';
     setVariant(vIdx);
     Layers.open(el, opts.focusSizes ? $('.qv-size', el) : null);
+    setUrl('/products/' + p.handle);
   }
+  // La URL refleja el producto abierto (link compartible). Sin recargar la página.
+  function setUrl(path){
+    if (!ROOT || location.pathname === path) return;
+    try { history.replaceState(null, '', path + location.search); } catch (e) {}
+  }
+  new MutationObserver(() => { if (!el.classList.contains('is-open') && /^\/products\//.test(location.pathname)) setUrl('/'); })
+    .observe(el, { attributes:true, attributeFilter:['class'] });
+  $('#qvFull').addEventListener('click', async () => {
+    const url = location.origin + '/products/' + p.handle;
+    try { await navigator.clipboard.writeText(url); $('#qvFull').textContent = '✓ Link copiado'; }
+    catch (e) { $('#qvFull').textContent = url; }
+  });
   el.addEventListener('click', e => {
     const th = e.target.closest('.qv-thumb'); if (th) return setImage($$('.qv-thumb', el).indexOf(th));
     const co = e.target.closest('.qv-color'); if (co) return setVariant($$('.qv-color', el).indexOf(co));
@@ -1965,6 +1982,18 @@ const Search = (() => {
 
 function initStore(){
   Cart.render();
+  // Entrada directa a /products/<handle> (p. ej. link desde Instagram): abrir ese modelo
+  const m = /^\/products\/([\w-]+)/.exec(location.pathname);
+  if (m) {
+    const prod = ALL.find(x => x.handle === m[1]);
+    if (prod) setTimeout(() => QV.open(prod.id), matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1300);
+    else history.replaceState(null, '', '/');
+  }
+  // Cualquier enlace con data-quick fuera de una tarjeta (p. ej. "Comprar ahora") abre la vista rápida
+  document.addEventListener('click', e => {
+    const q = e.target.closest('[data-quick]');
+    if (q && !q.closest('.card')) { e.preventDefault(); QV.open(q.dataset.quick); }
+  });
   $('#cartBtn').addEventListener('click', () => Layers.open($('#cart'), $('#cart [data-close].icon-btn')));
   $('#searchBtn').addEventListener('click', () => Search.open());
   // "/" abre la búsqueda (atajo de teclado)
